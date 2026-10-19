@@ -1,0 +1,8 @@
+Item Class: Tablet
+Rarity: Rare
+Breach Precursor Tablet
+--------
+Item Level: 79
+--------
+24% increased Effect of Expedition Remnants in Map
+37% increased Effectiveness of Rare Breach Monsters in Map

@@ -1,0 +1,11 @@
+Item Class: Wands
+Rarity: Rare
+Spite Bough
+Driftwood Wand
+--------
+Item Level: 80
+--------
++1 to Level of all Spell Skills
+38% increased Spell Damage
+14% increased Cast Speed
++45 to maximum Mana

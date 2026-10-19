@@ -1,0 +1,16 @@
+Item Class: Rings
+Rarity: Rare
+Soul Coil
+Ruby Ring
+--------
+Item Level: 82
+--------
+{ Implicit Modifier — Resistance }
++8(6-10)% to all Elemental Resistances (implicit)
+--------
+{ Prefix Modifier "Hale" (Tier: 3) — Life }
++86(80-99) to maximum Life
+{ Suffix Modifier "of the Drake" (Tier: 2) — Elemental, Resistance }
++31(30-35)% to Cold Resistance
+{ Suffix Modifier "of the Storm" (Tier: 3) — Elemental, Resistance }
++27(24-29)% to Lightning Resistance

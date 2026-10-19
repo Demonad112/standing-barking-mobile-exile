@@ -1,0 +1,11 @@
+Item Class: Boots
+Rarity: Rare
+Storm Tread
+Wrapped Greaves
+--------
+Item Level: 83
+--------
+30% increased Movement Speed
++91 to maximum Life
++32% to Lightning Resistance
++24 to Dexterity

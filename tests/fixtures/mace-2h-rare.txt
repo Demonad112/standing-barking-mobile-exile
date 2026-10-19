@@ -1,0 +1,11 @@
+Item Class: Two Hand Maces
+Rarity: Rare
+Doom Hammer
+Giant Maul
+--------
+Item Level: 81
+--------
+Adds 20 to 52 Physical Damage
++31 to Strength
+11% increased Attack Speed
+Adds 14 to 33 Fire Damage

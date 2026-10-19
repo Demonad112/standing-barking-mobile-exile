@@ -1,0 +1,13 @@
+Item Class: Amulets
+Rarity: Rare
+Doom Locket
+Lapis Amulet
+--------
+Item Level: 84
+--------
++27 to all Attributes
++97 to maximum Life
++39% to Fire Resistance
++20 to Spirit
+28% increased Critical Hit Chance
++6 Life Regeneration per second

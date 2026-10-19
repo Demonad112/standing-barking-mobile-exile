@@ -1,0 +1,10 @@
+{
+  "source": "PathOfBuilding-PoE2 src/Data/{QueryMods,TradeSiteStats}.lua (MIT). Game data (c) Grinding Gear Games.",
+  "pob2Commit": "bb52d6b368307457eb9c54bb13f1829993d390b1",
+  "pob2CommitDate": "2026-10-01T23:55:51+10:00",
+  "builtAt": "2026-10-19T23:00:16.328Z",
+  "counts": {
+    "mods": 2225,
+    "statTexts": 3782
+  }
+}

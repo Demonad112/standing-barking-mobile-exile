@@ -1,0 +1,11 @@
+Item Class: Waystones
+Rarity: Rare
+Waystone (Tier 15)
+--------
+Waystone Tier: 15
+--------
+Item Level: 79
+--------
+64% increased Rarity of Items found in Map
+31% increased Pack Size in Map
+27% increased Magic Pack Size
