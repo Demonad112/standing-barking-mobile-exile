@@ -101,3 +101,18 @@ describe("matchLine", () => {
     expect(matchLine(line("+5 to zzzz qqqq"), "Rings", index).confidence).toBe("none");
   });
 });
+
+import { statsFromApi } from "../scripts/lib/tradeStats.js";
+describe("statsFromApi", () => {
+  it("maps text to ids per type and skips pseudo", () => {
+    const t = statsFromApi({ result: [
+      { entries: [{ id: "pseudo.pseudo_x", text: "# Modifiers", type: "pseudo" }] },
+      { entries: [{ id: "explicit.stat_1", text: "# to maximum Life", type: "explicit" }, { id: "implicit.stat_1", text: "# to maximum Life", type: "implicit" }] },
+    ] });
+    expect(t).toEqual({ "# to maximum Life": { explicit: "explicit.stat_1", implicit: "implicit.stat_1" } });
+  });
+  it("fails loudly on bad payloads", () => {
+    expect(() => statsFromApi({} as never)).toThrow();
+    expect(() => statsFromApi({ result: [] })).toThrow();
+  });
+});

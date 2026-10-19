@@ -1,0 +1,8 @@
+name = "poe2-item-search-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Set both before deploying. ALLOWED_ORIGIN must equal the Pages origin exactly (no trailing slash).
+ALLOWED_ORIGIN = "https://poe2-item-search.pages.dev"
+USER_AGENT = "poe2-item-search/0.1 (contact: you@example.com)"

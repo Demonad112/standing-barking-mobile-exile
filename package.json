@@ -8,9 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "data:update": "tsx scripts/fetch-data.ts",
-    "data:trade-stats": "tsx scripts/fetch-trade-stats.ts",
-    "data:build": "tsx scripts/build-data.ts"
+    "data:update": "tsx scripts/build-data.ts",
+    "data:trade-stats": "tsx scripts/fetch-trade-stats.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

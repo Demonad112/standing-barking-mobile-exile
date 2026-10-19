@@ -25,8 +25,13 @@ export function skeletonOf(text: string): string {
   return text.replace(NUM, "#").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+/** GGG markup in API/clipboard strings: "<tag>{text}" -> text, "[A]" -> A, "[A|B]" -> B (as in PoB's escapeGGGString). */
+export function stripGGG(text: string): string {
+  return text.replace(/<[^>]+>\{([^}]+)\}/g, "$1").replace(/\[([^|\]]+)\]/g, "$1").replace(/\[[^|\]]+\|([^|\]]+)\]/g, "$1");
+}
+
 export function normalizeLine(line: string): Normalized {
-  const { text, kind } = stripTag(line);
+  const { text, kind } = stripTag(stripGGG(line));
   const noRange = text.replace(ROLL_RANGE, "$1");
   const values = [...noRange.matchAll(NUM)].map((m) => Number(m[0]));
   return { skeleton: skeletonOf(noRange), values, kind };
