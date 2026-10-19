@@ -74,3 +74,9 @@ export function matchLine(line: ParsedLine, itemClass: string | undefined, index
 export function matchItem(item: ParsedItem, index: ModIndex): LineMatch[] {
   return item.lines.map((l) => matchLine(l, item.itemClass, index));
 }
+
+/** Candidate for a mod the user picked by hand from the full list. Rolls are aligned when the numbers fit the template. */
+export function candidateFromEntry(e: IndexedText, line: ParsedLine, itemClass: string | undefined): MatchCandidate {
+  const rolls = align(e, line.values);
+  return candidate(e, line, slotKeysFor(itemClass), 1, true, rolls ?? line.values);
+}

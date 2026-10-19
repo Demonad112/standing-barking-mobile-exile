@@ -76,6 +76,12 @@ export function parseItem(text: string): ParsedItem {
   return item;
 }
 
+/** Parse one mod line typed or edited by the user. */
+export function lineFromText(raw: string, kind: ModKind = "explicit"): ParsedLine {
+  const n = normalizeLine(raw);
+  return { raw, kind: n.kind ?? kind, values: n.values, skeleton: n.skeleton };
+}
+
 /** Prefix/suffix limits. Only lines with a known affix are counted (advanced format or manual tagging). */
 export function validateAffixes(item: Pick<ParsedItem, "rarity" | "lines">): string[] {
   // A hybrid affix spans several lines but is one affix: count each group once.

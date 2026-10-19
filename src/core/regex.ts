@@ -5,6 +5,19 @@ import { slotKeysFor, type IndexedText, type ModIndex } from "./modIndex.js";
 
 export const DEFAULT_CHAR_LIMIT = 250; // poe.re's constant; the game's real cap is UNVERIFIED
 
+/** Shortest fragment we emit. The game search matches the whole item (names, bases, properties), so tiny fragments risk false hits. */
+export const MIN_FRAGMENT = 4;
+
+/** Item text that is not a mod line. A fragment found inside one of these is rejected. Not exhaustive: bases and names are unknown. */
+const LABELS = [
+  "item class", "rarity", "item level", "requires", "level", "quality", "sockets", "armour", "evasion rating", "energy shield",
+  "ward", "block chance", "physical damage", "elemental damage", "critical hit chance", "attacks per second", "reload time",
+  "waystone tier", "spirit", "stack size", "corrupted", "unidentified", "mirrored", "fractured item", "strength", "dexterity",
+  "intelligence", "rune", "augment", "implicit", "modifiers", "normal", "magic", "rare", "unique", "tier", "fire damage",
+  "cold damage", "lightning damage", "chaos damage",
+];
+const inLabel = (frag: string) => LABELS.some((l) => l.includes(frag));
+
 const SPECIAL = /[\\^$.*+?()[\]{}|]/g;
 export const escapeRegex = (s: string) => s.replace(SPECIAL, "\\$&");
 
@@ -44,7 +57,7 @@ export interface ModRegex {
   unique: boolean;
 }
 
-interface Cand { frag: string; anchored: boolean }
+interface Cand { frag: string; anchored: boolean; mid: boolean }
 
 function* candidates(text: string): Generator<Cand> {
   const t = text.toLowerCase();
@@ -54,14 +67,17 @@ function* candidates(text: string): Generator<Cand> {
     const last = si === segs.length - 1;
     for (let a = 0; a < seg.length; a++) {
       if (seg[a] === " ") continue;
-      for (let b = a + 1; b <= seg.length; b++) {
+      for (let b = a + MIN_FRAGMENT; b <= seg.length; b++) {
         if (seg[b - 1] === " ") continue;
-        out.push({ frag: seg.slice(a, b), anchored: false });
-        if (last && b === seg.length) out.push({ frag: seg.slice(a, b), anchored: true });
+        const mid = a > 0 && seg[a - 1] !== " ";
+        out.push({ frag: seg.slice(a, b), anchored: false, mid });
+        if (last && b === seg.length) out.push({ frag: seg.slice(a, b), anchored: true, mid });
       }
     }
   });
-  out.sort((x, y) => x.frag.length + (x.anchored ? 1 : 0) - (y.frag.length + (y.anchored ? 1 : 0)));
+  // Shortest first; starting mid-word costs 3 characters so word-aligned fragments win ties.
+  const cost = (c: Cand) => c.frag.length + (c.anchored ? 1 : 0) + (c.mid ? 3 : 0);
+  out.sort((x, y) => cost(x) - cost(y));
   yield* out;
 }
 
@@ -82,13 +98,12 @@ const render = (text: string, n: number) => text.replace(/#/g, String(n));
 export function modFragment(target: IndexedText, universe: IndexedText[]): { fragment: string; unique: boolean } {
   const others = universe.filter((e) => e !== target);
   for (const c of candidates(target.text)) {
-    if (!others.some((e) => collides(c, e))) return { fragment: escapeRegex(c.frag) + (c.anchored ? "$" : ""), unique: true };
+    if (!inLabel(c.frag) && !others.some((e) => collides(c, e))) return { fragment: escapeRegex(c.frag) + (c.anchored ? "$" : ""), unique: true };
   }
   const lower = target.text.toLowerCase();
   if (lower.startsWith("#")) {
     const seg = lower.split("#")[1] ?? "";
     for (let n = 1; n <= seg.length; n++) {
-      if (seg[n - 1] === " " && n < seg.length) { /* allow inner spaces */ }
       for (const end of [false, true]) {
         const tail = seg.slice(0, n);
         if (end && n !== seg.length) continue;

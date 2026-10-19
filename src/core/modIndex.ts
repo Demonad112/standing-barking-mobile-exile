@@ -74,3 +74,17 @@ const CLASS_SLOTS: Record<string, string[]> = {
 export function slotKeysFor(itemClass: string | undefined): string[] {
   return (itemClass && CLASS_SLOTS[itemClass.toLowerCase()]) || [];
 }
+
+export const ITEM_CLASSES = [
+  "Rings", "Amulets", "Belts", "Body Armours", "Helmets", "Gloves", "Boots", "Shields", "Bucklers", "Foci", "Quivers",
+  "Bows", "Crossbows", "Wands", "Staves", "Quarterstaves", "Sceptres", "Spears", "Flails", "Claws", "Daggers", "Talismans",
+  "One Hand Maces", "Two Hand Maces", "One Hand Swords", "Two Hand Swords", "One Hand Axes", "Two Hand Axes",
+  "Jewels", "Charms", "Life Flasks", "Mana Flasks", "Waystones", "Tablets",
+] as const;
+
+/** "Tablet" / "ring" / "Rings" -> canonical class name, or undefined. */
+export function canonicalClass(s: string | undefined): string | undefined {
+  if (!s) return undefined;
+  const k = s.trim().toLowerCase().replace(/s$/, "");
+  return ITEM_CLASSES.find((c) => c.toLowerCase().replace(/s$/, "") === k);
+}

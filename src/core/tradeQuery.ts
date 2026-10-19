@@ -127,3 +127,16 @@ export const CATEGORY_BY_CLASS: Record<string, string> = {
   waystones: "map.waystone",
 };
 export const categoryFor = (itemClass: string | undefined) => (itemClass ? CATEGORY_BY_CLASS[itemClass.toLowerCase()] : undefined);
+
+/**
+ * Body that finds one specific listing: same query plus the seller's account, and (for weighted searches) a narrow
+ * window around the listing's server-side weight. Same approach as PoB2's "open on trade site" (TradeQuery.lua).
+ */
+export function listingBody(body: BuiltQuery["body"], account: string, serverWeight?: number): BuiltQuery["body"] {
+  const q = JSON.parse(JSON.stringify(body.query)) as Record<string, any>;
+  const f = (q["filters"] ??= {});
+  f.trade_filters = { filters: { ...(f.trade_filters?.filters ?? {}), account: { input: account } } };
+  const group = (q["stats"] as any[]).find((g) => g.type === "weight");
+  if (group && serverWeight !== undefined) group.value = { min: Math.floor(serverWeight) - 1, max: Math.round(serverWeight) + 1 };
+  return { query: q, sort: body.sort };
+}

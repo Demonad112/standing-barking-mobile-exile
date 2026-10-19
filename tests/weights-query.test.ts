@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildQuery, categoryFor, tradeUrl, tradeUrlPob, COMPLEXITY_LIMIT } from "../src/core/tradeQuery.js";
+import { buildQuery, categoryFor, listingBody, tradeUrl, tradeUrlPob, COMPLEXITY_LIMIT } from "../src/core/tradeQuery.js";
 import { rollOf, score, value } from "../src/core/scoring.js";
 import { normalizedWeight, resolveWeight } from "../src/core/weights.js";
 
@@ -70,5 +70,17 @@ describe("buildQuery", () => {
     expect(JSON.parse(decodeURIComponent(u.split("?q=")[1]!))).toEqual(q.body);
     const p = await tradeUrlPob(q.body, "Standard");
     expect(p).toMatch(/^https:\/\/www\.pathofexile\.com\/trade2\/search\/Standard\/[A-Za-z0-9_-]+$/);
+  });
+});
+
+describe("listingBody", () => {
+  it("adds the seller account and a weight window without mutating the original", () => {
+    const q = buildQuery([{ id: "a", weight: 2 }], { league: "L", maxPriceExalted: 10, minScore: 50 });
+    const before = JSON.stringify(q.body);
+    const b = listingBody(q.body, "seller#1234", 172.3) as any;
+    expect(b.query.filters.trade_filters.filters.account).toEqual({ input: "seller#1234" });
+    expect(b.query.filters.trade_filters.filters.price).toEqual({ option: "exalted", max: 10 });
+    expect(b.query.stats[0].value).toEqual({ min: 171, max: 173 });
+    expect(JSON.stringify(q.body)).toBe(before);
   });
 });

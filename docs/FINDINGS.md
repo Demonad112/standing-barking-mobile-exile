@@ -110,3 +110,27 @@ PoB builds `https://www.pathofexile.com/trade2/search/<league>/<base64url(gzip(J
 2. **Network.** Allow `www.pathofexile.com` and `data.poe.re` (if b) in the environment's Network access, or paste me one real weighted-sum search URL/JSON and a `/data/stats` sample.
 3. **Value metric.** Keep spec `score / priceExalted`, or adopt PoB's `score − 0.1·log10(price)`; or offer both as a toggle (recommended).
 4. **Spec corrections.** Fetch batch 10 not 100; 35-filter cap → complexity budget.
+
+## 7. Build status and acceptance walk (end of this session)
+
+Items marked **NEEDS-MANUAL** were not and cannot be verified in this sandbox (no game, no access to pathofexile.com).
+
+| Criterion (spec section 8) | Result | Evidence |
+|---|---|---|
+| Photo → editable review list in ~5 s on a mid-range Android | **NEEDS-MANUAL** | Preprocessing is unit-tested; OCR runs in a worker. Never run on a real photo or device: only the preprocessing and OCR-line parsing are tested. |
+| Prefix/suffix ≤3 validation fires on bad matches | **PASS** (advanced-format input and manual P/S tags) | `validateAffixes` tests incl. 4-prefix fixture. Plain copy has no affix info, so it only fires when the user tags lines. |
+| Regex for 5 sample items works in the in-game stash search | **NEEDS-MANUAL** | JS-regex uniqueness and number tests pass; the game's search was not run. |
+| Mode A link opens a weighted-sum search matching on-screen weights | **NEEDS-MANUAL** | JSON shape from PoB source; link format unverified. |
+| Mode B ranked listings; score equals Σ weight × roll recomputed independently | **PASS** against a mock server | `tests/tradeClient.test.ts` "score recomputation". Real API shape taken from PoB's parser, unverified live. |
+| Filter count never exceeds limit; dropped mods shown | **PASS** (complexity budget, not flat 35) | `buildQuery` tests, UI counters and notes. |
+| 429 handling demonstrated with a mock server | **PASS** | Client and Worker tests (2 s, 4 s backoff, Retry-After, give-up). |
+| Works offline for Input → Review → Regex | **PASS** in headless Chromium | `scripts/smoke.ts`: service worker control, network cut, regex generated, zero cross-origin requests. OCR offline not exercised (no photo run). |
+| No LLM/AI references in source or build output | **PASS** | `grep -riEw "anthropic|openai|llm|gpt|claude"` over src, scripts, worker, tests, data, dist/assets: no matches. (Vendored WASM blobs excluded: base64 noise.) |
+
+### Known UNVERIFIED items (all flagged in the UI where relevant)
+
+- Item text layouts (plain and Ctrl+Alt+C), including `(implicit)`/`(rune)` tags and `{ … }` headers: reconstructed from memory; fixtures are synthetic.
+- Trade2 search/fetch URL shapes for the proxy (`/api/trade2/search/poe2/<league>`), 64-hex item ids, fetch batch size, `ilvl` filter id, `type_filters.category` values beyond those in PoB/poe.re, price option strings.
+- Mod ranges are PoB's per-slot min/max across all tiers; weapons without a matching slot key (e.g. swords/axes) have partial data.
+- `^` line anchor and `\D`, `\d` support in the game search (poe.re uses `\d`, `^`, `$`; the combination here is untested).
+- Waystone/tablet mods have no roll ranges in the data: they need manual weights.

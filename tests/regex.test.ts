@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { atLeast, generateRegex, modRegex, universeFor } from "../src/core/regex.js";
+import { atLeast, generateRegex, MIN_FRAGMENT, modRegex, universeFor } from "../src/core/regex.js";
 import { index } from "./helpers.js";
 
 const entry = (t: string) => { const e = index.all.find((x) => x.text === t); if (!e) throw new Error(t); return e; };
@@ -27,6 +27,15 @@ describe("fragments", () => {
       const re = new RegExp(r.regex, "i");
       expect(re.test("+" + render(t)), `self ${t}`).toBe(true);
       for (const o of u) if (o !== e) expect(re.test(render(o.text)), `${r.regex} must not match ${o.text}`).toBe(false);
+    }
+  });
+  it("never emits fragments shorter than the minimum, nor ones found in item labels", () => {
+    for (const t of ["# to maximum Life", "# to Accuracy Rating", "#% increased Rarity of Items found", "#% to Chaos Resistance"]) {
+      const e = entry(t);
+      const r = modRegex({ entry: e }, universeFor(index, e, "Rings"));
+      const bare = r.fragment.replace(/\\./g, ".").replace(/\$$/, "");
+      expect(bare.length, t).toBeGreaterThanOrEqual(MIN_FRAGMENT);
+      expect(["armour", "level", "evasion rating", "energy shield", "requires", "item level"].some((l) => l.includes(bare)), t).toBe(false);
     }
   });
   it("fragments are short", () => {
