@@ -3,7 +3,7 @@ import { canonicalClass } from "./core/modIndex.js";
 import { parseItem } from "./core/parseItem.js";
 import type { RatesTable } from "./core/rates.js";
 import { loadData, type DataBundle } from "./data.js";
-import { decodeShared, encodeShared, fromShared, rowFromEntry, rowsFromItem, toShared, type ItemMeta, type Row } from "./model.js";
+import { annotate, decodeShared, encodeShared, fromShared, rowFromEntry, rowsFromItem, toShared, type AnnotateCtx, type ItemMeta, type Row } from "./model.js";
 import { parseOcrLines } from "./ocr/fromOcr.js";
 import { DEFAULT_SETTINGS, type Settings } from "./settings.js";
 import { load, loadSaved, save, saveSaved, type SavedSearch } from "./store.js";
@@ -54,13 +54,22 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  const ctxFor = (d: DataBundle, m: ItemMeta): AnnotateCtx => ({ affixes: d.affixes, baseType: m.baseType, itemClass: m.itemClass, itemLevel: m.itemLevel });
+
   const loadItem = (item: ReturnType<typeof parseItem>, conf?: Array<number | undefined>) => {
     if (!data) return;
     const cls = canonicalClass(item.itemClass) ?? meta.itemClass;
-    setMeta({ ...(cls ? { itemClass: cls } : {}), ...(item.rarity ? { rarity: item.rarity } : {}), ...(item.name ? { name: item.name } : {}), ...(item.baseType ? { baseType: item.baseType } : {}), ...(item.itemLevel ? { itemLevel: item.itemLevel } : {}) });
-    setRows(rowsFromItem(item, data.index, conf));
+    const m: ItemMeta = { ...(cls ? { itemClass: cls } : {}), ...(item.rarity ? { rarity: item.rarity } : {}), ...(item.name && item.name !== "?" ? { name: item.name } : {}), ...(item.baseType && item.baseType !== "?" ? { baseType: item.baseType } : {}), ...(item.itemLevel ? { itemLevel: item.itemLevel } : {}) };
+    setMeta(m);
+    setRows(rowsFromItem(item, data.index, conf, ctxFor(data, m)));
     setWarnings(item.warnings);
     setScreen("review");
+  };
+
+  /** Class, base or item level changed: the inferred prefix/suffix/tier depends on them, so redo it. */
+  const updateMeta = (m: ItemMeta) => {
+    setMeta(m);
+    if (data) setRows(annotate(rows, ctxFor(data, m)));
   };
 
   const shared = useMemo(() => toShared(rows, { league: settings.league, ...(settings.role ? { role: settings.role } : {}), ...(meta.itemClass ? { cls: meta.itemClass } : {}), ...(settings.priceCap ? { cap: settings.priceCap } : {}), ...(settings.minScore ? { minScore: settings.minScore } : {}) }), [rows, settings, meta.itemClass]);
@@ -86,8 +95,15 @@ export function App() {
           onMod={(e) => { setPhoto(undefined); setRows([...rows, rowFromEntry(e, meta.itemClass)]); setScreen("review"); }} />
       )}
       {data && screen === "review" && (
-        <ReviewScreen index={data.index} meta={meta} setMeta={setMeta} rows={rows} setRows={setRows} photo={photo} warnings={warnings}
-          onOcr={(lines) => { const { item, conf } = parseOcrLines(lines); setMeta({ ...meta, ...(item.itemLevel ? { itemLevel: item.itemLevel } : {}) }); setRows(rowsFromItem(item, data.index, conf)); setWarnings(item.warnings.filter((w) => !/item level/i.test(w) || !item.itemLevel)); }}
+        <ReviewScreen index={data.index} meta={meta} setMeta={updateMeta} annotateCtx={ctxFor(data, meta)} rows={rows} setRows={setRows} photo={photo} warnings={warnings}
+          onOcr={(lines) => {
+            const { item, conf } = parseOcrLines(lines, { affixes: data.affixes, known: (sk) => data.index.bySkeleton.has(sk) });
+            const cls = canonicalClass(item.itemClass) ?? meta.itemClass;
+            const m: ItemMeta = { ...meta, ...(cls ? { itemClass: cls } : {}), ...(item.baseType && item.baseType !== "?" ? { baseType: item.baseType } : {}), ...(item.itemLevel ? { itemLevel: item.itemLevel } : {}) };
+            setMeta(m);
+            setRows(rowsFromItem(item, data.index, conf, ctxFor(data, m)));
+            setWarnings(item.warnings.filter((w) => !/item level/i.test(w) || !item.itemLevel));
+          }}
           onNext={() => setScreen("mods")} />
       )}
       {data && screen === "mods" && <ModsScreen rows={rows} setRows={setRows} meta={meta} settings={settings} setSettings={setSettings} onNext={() => setScreen("output")} />}

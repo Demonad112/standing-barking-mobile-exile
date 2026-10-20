@@ -1,6 +1,7 @@
 import { PROFILES } from "../core/weights.js";
 import { COMPLEXITY_LIMIT } from "../core/tradeQuery.js";
-import { chosen, queryFor, rollOfRow, weightOf, type ItemMeta, type Level, type Row } from "../model.js";
+import { tierLabel } from "../core/affixes.js";
+import { affixKey, affixOf, chosen, queryFor, rollOfRow, weightOf, type ItemMeta, type Level, type Row } from "../model.js";
 import type { Settings } from "../settings.js";
 import { Chip, Note, Seg, num } from "./common.js";
 
@@ -18,7 +19,7 @@ export function ModsScreen({ rows, setRows, meta, settings, setSettings, onNext 
   };
   const plan = queryFor(rows, meta, settings);
   const used = shown.filter((r) => r.level !== "off");
-  const count = (a: "prefix" | "suffix") => new Set(used.filter((r) => r.affix === a).map((r) => r.group ?? `r${r.id}`)).size;
+  const count = (a: "prefix" | "suffix") => new Set(used.filter((r) => affixOf(r) === a).map(affixKey)).size;
   const weighted = plan.built.keptWeighted.length + plan.built.droppedWeighted.length;
   const dropped = plan.built.droppedWeighted.length + plan.built.droppedMust.length;
 
@@ -58,7 +59,7 @@ export function ModsScreen({ rows, setRows, meta, settings, setSettings, onNext 
           <div className="card" key={r.id}>
             <strong>{c.text}</strong>
             <div className="muted">
-              roll {Math.round(rollOfRow(r) * 100) / 100}{c.range ? ` · range ${c.range[0]}–${c.range[1]} for this item class` : " · no range known"}{r.affix ? ` · ${r.affix}` : ""}
+              roll {Math.round(rollOfRow(r) * 100) / 100}{c.range ? ` · range ${c.range[0]}–${c.range[1]} for this item class` : r.inf?.span ? ` · range ${r.inf.span[0]}–${r.inf.span[1]} (all tiers)` : " · no range known"}{affixOf(r) ? ` · ${affixOf(r)}${!r.affix && r.inf ? ` ${tierLabel(r.inf) ?? ""} ${r.inf.approx ? "(guess)" : "(auto)"}` : ""}` : ""}
             </div>
             <div className="row" style={{ marginTop: 6 }}>
               <Seg<Level> value={r.level} options={[["off", "Off"], ["nice", "Nice"], ["must", "Must"]]} onChange={(l) => update(r.id, (x) => ({ ...x, level: l }))} />

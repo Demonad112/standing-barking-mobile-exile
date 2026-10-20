@@ -1,7 +1,8 @@
+import type { AffixIndex, AffixInfo } from "./core/affixes.js";
 import { candidateFromEntry, matchItem, matchLine } from "./core/matchMods.js";
 import { slotKeysFor, type IndexedText, type ModIndex } from "./core/modIndex.js";
 import { lineFromText } from "./core/parseItem.js";
-import { skeletonOf } from "./core/normalize.js";
+import { skeletonOf, stripTag } from "./core/normalize.js";
 import { rollOf } from "./core/scoring.js";
 import { buildQuery, categoryFor, type BuiltQuery, type StatSelection } from "./core/tradeQuery.js";
 import type { Settings } from "./settings.js";
@@ -14,7 +15,10 @@ export interface Row {
   id: number;
   raw: string;
   kind: ModKind;
+  /** Affix read from the item text (advanced copy) or set by the user. Wins over `inf`. */
   affix?: Affix;
+  /** Prefix/suffix/tier inferred from the mod data (RePoE) for the item base and roll. Never from the photo itself. */
+  inf?: AffixInfo;
   tier?: number;
   group?: number;
   values: number[];
@@ -42,6 +46,25 @@ export interface ItemMeta {
   itemLevel?: number;
 }
 
+export interface AnnotateCtx { affixes: AffixIndex; baseType?: string | undefined; itemClass?: string | undefined; itemLevel?: number | undefined }
+
+const AFFIXED: ReadonlySet<ModKind> = new Set(["explicit", "fractured", "crafted", "desecrated"]);
+
+/** Infer prefix/suffix/tier for one row from its text, rolls, item base (or class) and item level. */
+export function annotateRow(r: Row, ctx: AnnotateCtx): Row {
+  const { inf: _i, ...rest } = r;
+  void _i;
+  if (!AFFIXED.has(r.kind) || r.values.length === 0) return rest;
+  const info = ctx.affixes.lookup(r.skeleton, r.values, ctx.affixes.tagSetsFor(ctx.baseType, ctx.itemClass), ctx.itemLevel);
+  return info ? { ...rest, inf: info } : rest;
+}
+export const annotate = (rows: Row[], ctx: AnnotateCtx): Row[] => rows.map((r) => annotateRow(r, ctx));
+
+/** The affix to show and count: what the item/user said, else the inferred one. */
+export const affixOf = (r: Row): Affix | undefined => r.affix ?? r.inf?.affix;
+/** Key that is shared by the lines of one hybrid affix. */
+export const affixKey = (r: Row): string => (r.group !== undefined ? `g${r.group}` : r.inf ? `f${r.inf.family}` : `r${r.id}`);
+
 /** Below this OCR confidence a line is never pre-accepted. */
 export const OCR_ACCEPT = 80;
 
@@ -49,14 +72,14 @@ export const chosen = (r: Row): MatchCandidate | undefined => r.manual ?? (r.pic
 
 let nextId = 1;
 
-export function rowsFromItem(item: ParsedItem, index: ModIndex, ocrConf?: (number | undefined)[]): Row[] {
+export function rowsFromItem(item: ParsedItem, index: ModIndex, ocrConf?: (number | undefined)[], ctx?: AnnotateCtx): Row[] {
   const matches = matchItem(item, index);
-  return matches.map((m, i) => {
+  const rows = matches.map((m, i) => {
     const l = m.line;
     const conf = ocrConf?.[i];
     const sure = m.confidence === "high" && (conf === undefined || conf >= OCR_ACCEPT);
     return {
-      id: nextId++, raw: l.raw, kind: l.kind, ...(l.affix ? { affix: l.affix } : {}), ...(l.tier ? { tier: l.tier } : {}),
+      id: nextId++, raw: stripTag(l.raw).text, kind: l.kind, ...(l.affix ? { affix: l.affix } : {}), ...(l.tier ? { tier: l.tier } : {}),
       ...(l.group !== undefined ? { group: l.group } : {}), values: l.values, skeleton: l.skeleton,
       ...(conf !== undefined ? { ocrConf: conf } : {}),
       match: m,
@@ -65,6 +88,7 @@ export function rowsFromItem(item: ParsedItem, index: ModIndex, ocrConf?: (numbe
       level: sure ? "nice" : "off",
     } satisfies Row;
   });
+  return ctx ? annotate(rows, ctx) : rows;
 }
 
 /** Re-match after the user edits the text. Resets confirmation: an edited line must be re-confirmed. */
@@ -99,7 +123,7 @@ export function weightOf(r: Row, itemClass: string | undefined, role: string | u
   if (!c) return undefined;
   return resolveWeight({
     skeleton: skeletonOf(c.text),
-    range: c.range, slotKeys: slotKeysFor(itemClass), ...(role ? { role } : {}), ...(r.weight !== undefined ? { manual: r.weight } : {}),
+    range: c.range ?? r.inf?.span, slotKeys: slotKeysFor(itemClass), ...(role ? { role } : {}), ...(r.weight !== undefined ? { manual: r.weight } : {}),
   });
 }
 
