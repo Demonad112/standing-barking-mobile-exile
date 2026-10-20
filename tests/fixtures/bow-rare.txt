@@ -1,0 +1,19 @@
+Item Class: Bows
+Rarity: Rare
+Gale Song
+Recurve Bow
+--------
+Physical Damage: 45-110
+Critical Hit Chance: 5.00%
+Attacks per Second: 1.20
+--------
+Requires: Level 60, 120 Dex
+--------
+Item Level: 78
+--------
+Adds 12 to 31 Physical Damage
+24% increased Physical Damage
+18% increased Attack Speed
++135 to Accuracy Rating
+Adds 9 to 40 Lightning Damage
++14% to Critical Hit Chance

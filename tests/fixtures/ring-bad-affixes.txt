@@ -1,0 +1,15 @@
+Item Class: Rings
+Rarity: Rare
+Broken Ring
+Ruby Ring
+--------
+Item Level: 82
+--------
+{ Prefix Modifier "A" (Tier: 3) — Life }
++86(80-99) to maximum Life
+{ Prefix Modifier "B" (Tier: 3) — Life }
++10(7-12) to maximum Mana
+{ Prefix Modifier "C" (Tier: 3) — Life }
++20(15-25) to Accuracy Rating
+{ Prefix Modifier "D" (Tier: 3) — Life }
++5(1-9) Life Regeneration per second

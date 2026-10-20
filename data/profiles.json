@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "note": "Hand-curated relative importance multipliers applied on top of the normalized weight (100 / maxRoll). Starting points only, not verified meta advice. Edit freely.",
+  "roles": {
+    "attack": "Attack",
+    "spell": "Spell",
+    "minion": "Minion",
+    "tank": "Tank",
+    "speed": "Speed"
+  },
+  "rules": [
+    { "id": "life", "match": "^# to maximum life$", "multiplier": { "default": 1.0, "tank": 1.5 } },
+    { "id": "energy-shield", "match": "maximum energy shield$|#% increased energy shield$", "multiplier": { "default": 0.8, "tank": 1.2, "spell": 1.1 } },
+    { "id": "resistances", "match": "^#% to (fire|cold|lightning|chaos|all elemental) resistances?$", "multiplier": { "default": 0.6, "tank": 0.9 } },
+    { "id": "movement-speed", "match": "^#% increased movement speed$", "slots": ["Boots"], "multiplier": { "default": 2.0 } },
+    { "id": "phys-damage", "match": "physical damage$", "multiplier": { "default": 0.5, "attack": 1.3 } },
+    { "id": "attack-speed", "match": "increased attack speed$", "multiplier": { "default": 0.5, "attack": 1.3, "speed": 1.3 } },
+    { "id": "crit", "match": "critical hit chance$", "multiplier": { "default": 0.6, "attack": 1.0, "spell": 1.0 } },
+    { "id": "spell-damage", "match": "increased spell damage$|to level of all spell skills$", "multiplier": { "default": 0.4, "spell": 1.4 } },
+    { "id": "cast-speed", "match": "increased cast speed$", "multiplier": { "default": 0.4, "spell": 1.3, "speed": 1.3 } },
+    { "id": "minion", "match": "minion", "multiplier": { "default": 0.3, "minion": 1.4 } },
+    { "id": "spirit", "match": "^# to spirit$", "multiplier": { "default": 0.8, "minion": 1.4 } }
+  ]
+}

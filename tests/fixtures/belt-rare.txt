@@ -1,0 +1,11 @@
+Item Class: Belts
+Rarity: Rare
+Grim Cinch
+Heavy Belt
+--------
+Item Level: 79
+--------
++124 to maximum Life
++36% to Fire Resistance
++18% to Chaos Resistance
++31 to Strength

@@ -1,0 +1,52 @@
+:root {
+  --bg: #fafaf8; --panel: #ffffff; --ink: #1c1d20; --muted: #5d6068; --line: #d9dbe0;
+  --accent: #8a5a00; --accent-ink: #ffffff; --ok: #1b6e3a; --warn: #8a5a00; --bad: #a3202c; --chip: #eceef2;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14161a; --panel: #1c1f25; --ink: #e9e7e1; --muted: #9aa0ab; --line: #343944;
+    --accent: #e0b04a; --accent-ink: #14161a; --ok: #62c58a; --warn: #e0b04a; --bad: #ff7a85; --chip: #272b33;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14161a; --panel: #1c1f25; --ink: #e9e7e1; --muted: #9aa0ab; --line: #343944;
+  --accent: #e0b04a; --accent-ink: #14161a; --ok: #62c58a; --warn: #e0b04a; --bad: #ff7a85; --chip: #272b33;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+#root { max-width: 920px; margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); }
+h1 { font-size: 1.15rem; margin: 12px 0 4px; }
+h2 { font-size: 1rem; margin: 18px 0 8px; }
+.banner { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; color: var(--muted); padding: 8px 0; border-bottom: 1px solid var(--line); }
+nav.steps { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+nav.steps button { flex: 1 1 auto; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-height: 44px; cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button.active { outline: 2px solid var(--accent); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+input[type=text], input[type=number], select, textarea { width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 44px; }
+textarea { min-height: 140px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; }
+label { display: block; font-size: .85rem; color: var(--muted); margin: 8px 0 3px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 10px 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > * { flex: 1 1 auto; }
+.row > .fixed { flex: 0 0 auto; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 12px; }
+.chip { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); white-space: nowrap; }
+.chip.ok { color: var(--ok); } .chip.warn { color: var(--warn); } .chip.bad { color: var(--bad); }
+.warn { color: var(--warn); } .bad { color: var(--bad); } .ok { color: var(--ok); } .muted { color: var(--muted); font-size: .85rem; }
+.note { border-left: 3px solid var(--warn); padding: 4px 10px; margin: 8px 0; font-size: .85rem; background: var(--chip); border-radius: 0 6px 6px 0; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; word-break: break-all; }
+.out { background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin: 6px 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 6px 10px; min-height: 36px; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.imgwrap { position: relative; display: inline-block; max-width: 100%; }
+.imgwrap img { max-width: 100%; display: block; border-radius: 8px; }
+.cropbox { position: absolute; border: 2px solid var(--accent); background: rgba(224,176,74,.12); pointer-events: none; }
+progress { width: 100%; }
+@media (max-width: 520px) { th.hide-sm, td.hide-sm { display: none; } }

@@ -1,0 +1,11 @@
+Item Class: Quarterstaves
+Rarity: Rare
+Wind Rod
+Long Quarterstaff
+--------
+Item Level: 75
+--------
+Adds 15 to 44 Cold Damage
++22 to Dexterity
+16% increased Physical Damage
++8% to Fire Resistance

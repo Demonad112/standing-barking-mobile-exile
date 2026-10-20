@@ -1,0 +1,11 @@
+Item Class: Helmets
+Rarity: Rare
+Dread Crown
+Iron Cap
+--------
+Item Level: 80
+--------
++101 to maximum Life
++36% to Cold Resistance
++23 to Intelligence
+14% increased Critical Hit Chance
