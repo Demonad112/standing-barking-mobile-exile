@@ -52,9 +52,19 @@ npx wrangler deploy
 
 Then paste the Worker URL into the Ranked tab (or set `VITE_PROXY_URL` at build time). The Worker sets a User-Agent, rate-limits from response headers, backs off on 429 (`2^n` s, cap 60 s), caches static data, and only answers your origin. POESESSID is optional, off by default, stored only in your browser, and forwarded only to your Worker.
 
-## Deploy the app (Cloudflare Pages)
+## Deploy the app
 
-Build command `pnpm build`, output directory `dist`. No server-side code is needed for Input → Review → Regex.
+**GitHub Pages (workflow included, `.github/workflows/pages.yml`):**
+
+1. Repo → Settings → Pages → Source: **GitHub Actions**.
+2. Merge to `main` (or run the workflow manually). Site: `https://<user>.github.io/<repo>/`.
+3. The build uses a relative base (`./`), so the repo sub-path works. PRs run typecheck, tests and build only.
+
+**Android app:** open the Pages URL in Chrome → menu → *Install app* / *Add to Home screen*. It runs standalone and offline for Input → Review → Regex (service worker precaches shell, mod data and OCR assets after the first load).
+
+**Cloudflare Pages (alternative):** build command `pnpm build`, output directory `dist`.
+
+No server-side code is needed for Input → Review → Regex or the trade link. The trade link is a plain URL to pathofexile.com that you tap; nothing is sent from the app. Only Ranked results needs the Worker.
 
 ## Not included
 
