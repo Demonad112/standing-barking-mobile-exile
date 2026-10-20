@@ -16,3 +16,12 @@ Answers to the open questions from `FINDINGS.md` section 6, made without live ac
 | 10 | **Vendor and Relic regex pages are not implemented.** Item (all classes), Waystone and Tablet work through the same generator. | Vendor/Relic rules are poe.re-specific; no data source. | Real need. |
 | 11 | **PoB2 weight import (optional Phase 6) is not implemented.** | Optional; out of scope without PoB export samples. | Requested. |
 | 12 | **Pushes happen only on request;** earlier push was explicitly approved. | Hard rule 6. | — |
+
+## Affix inference from RePoE (2026-10-20)
+
+- **Problem:** photos (and plain Ctrl+C text) carry no prefix/suffix info, so affix counts and tiers were empty.
+- **Choice:** build `affixes.json` from RePoE `mods`/`base_items` (MIT). Lookup key = line skeleton; filter by the base's spawn tags (first matching tag in the mod's ordered spawn list decides, weight > 0), item level >= required level (soft), and all rolled values inside a tier's range. Tier = rank of required level within the mod family among mods that can spawn on that base (T1 highest). Inferred affix is shown as `(auto)`, or `(guess)` when no tier's range contains the roll.
+- **Ambiguity:** a line shared by a pure mod and a hybrid half prefers the single-line family. Prefix-and-suffix both fitting returns nothing (user picks). Hybrid lines of one family count once toward the 3/3 limit.
+- **Why not trust RePoE blindly:** the export is a game-data dump for one patch; tier numbering here is our rank, not necessarily the in-game "Tier" label. Treat T-numbers as approximate until compared with the game.
+- **Implicit detection for photos:** line boxes from Tesseract give vertical gaps; a gap clearly larger than normal spacing is a section break. With two mod sections and a short (<= 2 lines) first one, it is tagged implicit. Wrong guesses are fixable with the kind dropdown.
+- **OCR:** multi-pass (adaptive threshold + despeckle, layout modes 3/6/11), scored by known-mod lines and base type; header-only rescue pass. Tuned on synthetic tooltip renders (`scripts/make-sample-tooltip.ts`), NOT on real game photos. Real photos are the open risk.

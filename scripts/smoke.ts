@@ -68,10 +68,28 @@ try {
   if (!offlineRegex.startsWith('"')) fail("offline regex failed");
   await page.screenshot({ path: `${shots}/7-offline-regex.png`, fullPage: true });
 
+  // Photo flow, online again: upload a degraded tooltip photo, crop to the card, read it with the in-browser OCR.
+  await ctx.setOffline(false);
+  await page.goto(base);
+  await page.getByText("Paste item text").waitFor();
+  await page.locator('input[type=file]').nth(1).setInputFiles("tests/fixtures/photos/tooltip-ring-tv.png");
+  await page.getByRole("heading", { name: "Photo" }).waitFor();
+  for (const [label, v] of [["Crop left", "0.1"], ["Crop top", "0.08"], ["Crop width", "0.5"], ["Crop height", "0.5"]] as const) await page.getByLabel(label).fill(v);
+  await page.getByRole("button", { name: "Read text" }).click();
+  await page.getByLabel("Line text").first().waitFor({ timeout: 120000 });
+  const photoLines = await page.getByLabel("Line text").evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
+  const want = ["+22% to Lightning Resistance", "+45 to maximum Life", "+32% to Fire Resistance", "+27% to Cold Resistance", "+7 to Strength"];
+  for (const w of want) if (!photoLines.includes(w)) fail(`photo OCR missed "${w}"; got ${JSON.stringify(photoLines)}`);
+  if (process.env.OCR_DEBUG) console.log(JSON.stringify(await page.evaluate(() => (window as unknown as { __ocrDebug?: unknown }).__ocrDebug), null, 1));
+  const text = await page.locator("body").innerText();
+  await page.screenshot({ path: `${shots}/8-photo-review.png`, fullPage: true });
+  if (!/Base type\s*Sapphire Ring/.test(text)) fail(`base type not detected from photo: ${text.slice(0, 700)}`);
+  if (!/prefix T\d+ \(auto\)/.test(text) || !/suffix T\d+ \(auto\)/.test(text)) fail("no inferred prefix/suffix tier chips");
+
   if (nets.length) fail(`unexpected cross-origin requests: ${nets.join(", ")}`);
   const real = errors.filter((e) => !/Failed to load resource|net::ERR/.test(e));
   if (real.length) fail(`console errors: ${real.join(" | ")}`);
-  console.log("SMOKE OK", { regex, offlineRegex });
+  console.log("SMOKE OK", { regex, offlineRegex, photoLines });
   await browser.close();
 } finally {
   server.kill();

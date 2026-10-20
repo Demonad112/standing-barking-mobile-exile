@@ -6,5 +6,14 @@
   "counts": {
     "mods": 2225,
     "statTexts": 3782
+  },
+  "affixes": {
+    "source": "RePoE fork PoE2 mods/base_items (MIT) + Sidekick trade-stats (MIT). Game data (c) Grinding Gear Games.",
+    "builtAt": "2026-10-20T05:49:38.060Z",
+    "mods": 2558,
+    "skeletons": 476,
+    "bases": 1754,
+    "tradeIdsAdded": 34,
+    "newStatTexts": 20
   }
 }

@@ -23,11 +23,13 @@ pnpm build && npx tsx scripts/smoke.ts /tmp/shots
 
 ## Data
 
-`public/data/*.json` is committed and built from PoB2's MIT data (a checkout at `vendor/pob2`, gitignored):
+`public/data/*.json` is committed. Two build-time steps, in this order:
 
 ```sh
 git clone --depth 1 https://github.com/PathOfBuildingCommunity/PathOfBuilding-PoE2 vendor/pob2
-pnpm data:update                    # rebuild mods.json, stats.json, meta.json
+pnpm data:update                    # PoB2 (MIT): mods.json (roll ranges per slot), stats.json (trade stat ids), meta.json
+pnpm data:repoe                     # RePoE PoE2 export (MIT) -> affixes.json; Sidekick trade-stats (MIT) merged into stats.json
+                                    # flags: --repoe <dir|url>  --sidekick <file|url>
 CONTACT=you@example.com pnpm data:trade-stats   # optional: refresh trade stat ids from the official API (build time only)
 ```
 
@@ -36,7 +38,9 @@ The banner on every screen shows the data snapshot date. Items whose mods are no
 ## Using it
 
 1. **Input**: camera, gallery, paste (Ctrl+C or Ctrl+Alt+C text), or search a mod.
-2. **Review**: every line is editable. Fuzzy matches and low-confidence OCR lines are never pre-accepted. Pick the item class and level if missing.
+2. **Review**: every line is editable. Fuzzy matches and low-confidence OCR lines are never pre-accepted. Base type, item class and level come from the photo when readable; otherwise set them (base picker, class list).
+   - **Prefix/suffix and tier are inferred**, not read: a plain tooltip photo has no affix markers, so each line is looked up in the RePoE mod data by text, rolled value, base-type tags and item level. Chips show `prefix T3 (auto)` plus the tier name; `(guess)` means the roll fit no tier. The A/P/S switch overrides it. The first mod section above a divider is tagged *implicit* (not counted as prefix/suffix); the kind dropdown changes it.
+   - Photo reading tries several image clean-ups (local threshold, different Tesseract layout modes) and keeps the one that matches the most known mods, then re-reads just the header if the base type was missed. Crop tight around the tooltip for best results. `window.__ocrDebug` in the browser console lists what each pass read.
 3. **Mods and weights**: mark each mod Off / Nice / Must. Weight source is shown (normalized `100/maxRoll`, role profile, or manual).
 4. **Output**: Regex, Trade link, Ranked results. Saved searches and share links (URL hash) live under Saved.
 
