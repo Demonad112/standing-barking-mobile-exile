@@ -7,3 +7,4 @@ vendor/
 *.log
 .wrangler/
 public/ocr/
+.claude/settings.local.json
